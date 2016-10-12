@@ -17,6 +17,7 @@ type loginResponse struct {
 	Token string `json: "token"`
 }
 
+// Logs in the user with the given username and password
 func (a *authService) Login(username, password string) loginResponse {
 	_, body, err := post(a.Base+"/login", map[string]string{"username": username, "password": password})
 	lr := loginResponse{}
@@ -27,6 +28,23 @@ func (a *authService) Login(username, password string) loginResponse {
 	json.Unmarshal(body, &lr)
 
 	return lr
+}
+
+// Logs out user with the given username and token
+func (a *authService) Logout(username, token string) bool {
+	status, _, _ := post(a.Base+"/logout", map[string]string{"username": username, "token": token})
+	if status == http.StatusOK {
+		return true
+	}
+	return false
+}
+
+func (a *authService) Authenticate(username, token string) bool {
+	status, _, _ := post(a.Base+"/authenticate", map[string]string{"username": username, "token": token})
+	if status == http.StatusOK {
+		return true
+	}
+	return false
 }
 
 func post(postURL string, payload map[string]string) (int, []byte, error) {
