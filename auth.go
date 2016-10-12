@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	// "encoding/json"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -15,6 +15,18 @@ type authService struct {
 
 type loginResponse struct {
 	Token string `json: "token"`
+}
+
+func (a *authService) Login(username, password string) loginResponse {
+	_, body, err := post(a.Base+"/login", map[string]string{"username": username, "password": password})
+	lr := loginResponse{}
+
+	if err != nil {
+		return lr
+	}
+	json.Unmarshal(body, &lr)
+
+	return lr
 }
 
 func post(postURL string, payload map[string]string) (int, []byte, error) {
