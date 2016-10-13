@@ -14,7 +14,7 @@ type user struct {
 }
 
 // Storage for user session tokens
-var userStorage = make(map[string]string)
+var userSessionStorage = make(map[string]string)
 
 var existingUsers = []user{
 	user{
@@ -33,8 +33,8 @@ func main() {
 	router := gin.Default()
 
 	router.POST("/login", login)
-	// router.POST("/authenticate", authenticate)
-	// router.POST("/logout", logout)
+	router.POST("/authenticate", authenticate)
+	router.POST("/logout", logout)
 
 	router.Run(":13001")
 }
@@ -45,10 +45,33 @@ func login(c *gin.Context) {
 
 	if userInDatabase(username, password) {
 		token := generateToken()
-		userStorage[username] = token
+		userSessionStorage[username] = token
 		c.JSON(http.StatusOK, gin.H{"token": token})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid username/password pair."})
+	}
+}
+
+func authenticate(c *gin.Context) {
+	username := c.PostForm("username")
+	token := c.PostForm("token")
+
+	if userAuthenticated(username, token) {
+		c.JSON(http.StatusOK, gin.H{"message": "Successfully authorized."})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Incorrect token."})
+	}
+}
+
+func logout(c *gin.Context) {
+	username := c.PostForm("username")
+	token := c.PostForm("token")
+
+	if userAuthenticated(username, token) {
+		delete(userSessionStorage, username)
+		c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Incorrect token."})
 	}
 }
 
@@ -65,4 +88,12 @@ func userInDatabase(username, password string) bool {
 		}
 	}
 	return false
+}
+
+func userAuthenticated(username, token string) bool {
+	if tok, ok := userSessionStorage[username]; ok && tok == token {
+		return true
+	} else {
+		return false
+	}
 }
