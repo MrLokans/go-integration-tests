@@ -25,3 +25,37 @@ func TestUserCanLoginWithCorrectUsernameAndPass(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestUserRequestWithIncorrectTokenIsRejected(t *testing.T) {
+	username := "user1"
+	lr := a.Login(username, "someincorrectpassword")
+	if a.Authenticate(username, lr.Token) {
+		t.Fail()
+	}
+}
+
+func TestUserGetsTokenAfterLogin(t *testing.T) {
+	username := "user1"
+	password := "pass1"
+
+	lr := a.Login(username, password)
+
+	if !a.Authenticate(username, lr.Token) {
+		t.Fail()
+	}
+}
+
+func TestUserTokenRejectedAfterLogout(t *testing.T) {
+	username := "user1"
+	password := "pass1"
+
+	lr := a.Login(username, password)
+
+	if !a.Logout(username, lr.Token) {
+		t.Fail()
+	}
+
+	if a.Authenticate(username, lr.Token) {
+		t.Fail()
+	}
+}
