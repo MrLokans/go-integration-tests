@@ -48,7 +48,7 @@ func login(c *gin.Context) {
 		userStorage[username] = token
 		c.JSON(http.StatusOK, gin.H{"token": token})
 	} else {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid username/password pair."})
 	}
 }
 
