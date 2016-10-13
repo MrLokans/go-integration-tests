@@ -1,11 +1,19 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
 	"strconv"
 )
+
+var serverPort int
+
+func init() {
+	flag.IntVar(&serverPort, "port", 13001, "Port to run web server on")
+}
 
 type user struct {
 	Username string `json:"username"`
@@ -28,6 +36,7 @@ var existingUsers = []user{
 }
 
 func main() {
+	flag.Parse()
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
@@ -36,7 +45,7 @@ func main() {
 	router.POST("/authenticate", authenticate)
 	router.POST("/logout", logout)
 
-	router.Run(":13001")
+	router.Run(fmt.Sprintf(":%d", serverPort))
 }
 
 func login(c *gin.Context) {

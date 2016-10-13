@@ -1,20 +1,29 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
+var serverPort int
+
 var auth = authService{Base: "http://localhost:4546"}
 
+func init() {
+	flag.IntVar(&serverPort, "port", 4545, "Port to run web server on")
+}
+
 func main() {
+	flag.Parse()
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
 	router.POST("/login", loginFunc)
 	router.GET("/logout", logoutFunc)
 	router.POST("/protected-content", serveProtectedFunc)
-	router.Run(":4545")
+	router.Run(fmt.Sprintf(":%d", serverPort))
 }
 
 func loginFunc(c *gin.Context) {
